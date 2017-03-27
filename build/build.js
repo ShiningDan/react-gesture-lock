@@ -9563,14 +9563,14 @@ var AppLock = function (_React$Component) {
                     'footer',
                     { id: 'choices' },
                     _react2.default.createElement(
-                        'button',
+                        'div',
                         { id: 'set-pass', className: 'choice' },
                         '\u8BBE\u7F6E\u5BC6\u7801'
                     ),
                     _react2.default.createElement(
-                        'button',
+                        'div',
                         { id: 'verify-pass', className: 'choice' },
-                        '\u8BBE\u7F6E\u5BC6\u7801'
+                        '\u9A8C\u8BC1\u5BC6\u7801'
                     )
                 )
             );
