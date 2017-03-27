@@ -9564,12 +9564,12 @@ var AppLock = function (_React$Component) {
                     { id: 'choices' },
                     _react2.default.createElement(
                         'button',
-                        { id: 'set-pass' },
+                        { id: 'set-pass', className: 'choice' },
                         '\u8BBE\u7F6E\u5BC6\u7801'
                     ),
                     _react2.default.createElement(
                         'button',
-                        { id: 'verify-pass' },
+                        { id: 'verify-pass', className: 'choice' },
                         '\u8BBE\u7F6E\u5BC6\u7801'
                     )
                 )
@@ -11542,7 +11542,7 @@ exports = module.exports = __webpack_require__(87)(undefined);
 
 
 // module
-exports.push([module.i, "body{background-color: #F0F0F2;}\nheader{background-color: #F8F8F8;text-align: center;border-bottom: 2px solid #C7C7C8;}\nheader span{display: inline-block;margin: 2vh;}\n#gesture-wrap{height: 70vh;}\n#tips{text-align: center;height: 6vh;margin: 4vh}\n#points{width: 80vw; height: 80vw;margin: 0 10vw;display: flex;flex-direction: column;justify-content: space-between;}\n.points-row{display: flex;flex-direction: row;justify-content: space-between}\n.point{height: 18vw; width: 18vw;border-radius: 50%;border: 1px solid #D5D4D5;}\nfooter{height: 15vh;text-align: center}", ""]);
+exports.push([module.i, "html{font-size: 18px;}\nbody{background-color: #F0F0F2;margin: 0;padding: 0;}\nheader{background-color: #F8F8F8;text-align: center;border-bottom: 2px solid #C7C7C8;}\nheader span{display: inline-block;margin: 2vh;}\n#gesture-wrap{}\n#tips{text-align: center;height: 6vh;margin: 8vh}\n#points{width: 70vw; height: 70vw;margin: 0 auto;display: flex;flex-direction: column;justify-content: space-between;}\n.points-row{display: flex;flex-direction: row;justify-content: space-between}\n.point{height: 16vw; width: 16vw;border-radius: 50%;border: 1px solid #D5D4D5;}\n#choices{width: 60vw;margin: 10vh auto;text-align: center;display: flex;justify-content: space-around}\n.choice{font-size: 0.8rem;}", ""]);
 
 // exports
 
