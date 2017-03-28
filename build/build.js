@@ -9511,11 +9511,65 @@ var AppLock = function (_React$Component) {
     }
 
     _createClass(AppLock, [{
+        key: 'handleTouchStart',
+        value: function handleTouchStart(event) {
+            console.log(event.target);
+        }
+    }, {
+        key: 'resetCanvasHW',
+        value: function resetCanvasHW() {
+            var drawing = document.getElementById('gesture-lock');
+            if (drawing.getContext) {
+                var context = drawing.getContext("2d");
+                context.canvas.width = context.canvas.clientWidth;
+                context.canvas.height = context.canvas.clientHeight;
+                console.log('resize canvas HW');
+            }
+        }
+    }, {
+        key: 'drawCircles',
+        value: function drawCircles() {
+            var drawing = document.getElementById('gesture-lock');
+            if (drawing.getContext) {
+                var context = drawing.getContext("2d"),
+                    n = 3;
+                var width = context.canvas.width;
+                var r = width / (n * 2 + (n + 1) * 1.6);
+                var arr = [];
+                for (var i = 0; i < n; i++) {
+                    for (var j = 0; j < n; j++) {
+                        arr.push({
+                            x: 3.6 * i * r + 2.6 * r,
+                            y: 3.6 * j * r + 2.6 * r
+                        });
+                    }
+                }
+                context.beginPath();
+                arr.forEach(function (value) {
+                    context.moveTo(value.x + r, value.y);
+                    context.arc(value.x, value.y, r, 0, 2 * Math.PI);
+                });
+                context.stroke();
+            }
+        }
+    }, {
+        key: 'componentDidMount',
+        value: function componentDidMount() {
+            window.addEventListener("resize", this.resetCanvasHW);
+            this.resetCanvasHW();
+            this.drawCircles();
+        }
+    }, {
+        key: 'componentWillUnMount',
+        value: function componentWillUnMount() {
+            window.removeEventListener("resize", this.resetCanvasHW);
+        }
+    }, {
         key: 'render',
         value: function render() {
             return _react2.default.createElement(
                 'div',
-                null,
+                { onTouchStart: this.handleTouchStart },
                 _react2.default.createElement(
                     'header',
                     null,
@@ -9534,29 +9588,9 @@ var AppLock = function (_React$Component) {
                         this.state.tips
                     ),
                     _react2.default.createElement(
-                        'div',
-                        { id: 'points' },
-                        _react2.default.createElement(
-                            'div',
-                            { className: 'points-row' },
-                            _react2.default.createElement('div', { className: 'point', id: 'point-1' }),
-                            _react2.default.createElement('div', { className: 'point', id: 'point-2' }),
-                            _react2.default.createElement('div', { className: 'point', id: 'point-3' })
-                        ),
-                        _react2.default.createElement(
-                            'div',
-                            { className: 'points-row' },
-                            _react2.default.createElement('div', { className: 'point', id: 'point-4' }),
-                            _react2.default.createElement('div', { className: 'point', id: 'point-5' }),
-                            _react2.default.createElement('div', { className: 'point', id: 'point-6' })
-                        ),
-                        _react2.default.createElement(
-                            'div',
-                            { className: 'points-row' },
-                            _react2.default.createElement('div', { className: 'point', id: 'point-7' }),
-                            _react2.default.createElement('div', { className: 'point', id: 'point-8' }),
-                            _react2.default.createElement('div', { className: 'point', id: 'point-9' })
-                        )
+                        'canvas',
+                        { id: 'gesture-lock' },
+                        'A Gesture Lock'
                     )
                 ),
                 _react2.default.createElement(
@@ -11542,7 +11576,7 @@ exports = module.exports = __webpack_require__(87)(undefined);
 
 
 // module
-exports.push([module.i, "html{font-size: 18px;}\nbody{background-color: #F0F0F2;margin: 0;padding: 0;}\nheader{background-color: #F8F8F8;text-align: center;border-bottom: 2px solid #C7C7C8;}\nheader span{display: inline-block;margin: 2vh;}\n#gesture-wrap{}\n#tips{text-align: center;height: 6vh;margin: 8vh}\n#points{width: 70vw; height: 70vw;margin: 0 auto;display: flex;flex-direction: column;justify-content: space-between;}\n.points-row{display: flex;flex-direction: row;justify-content: space-between}\n.point{height: 16vw; width: 16vw;border-radius: 50%;border: 1px solid #D5D4D5;}\n#choices{width: 60vw;margin: 10vh auto;text-align: center;display: flex;justify-content: space-around}\n.choice{font-size: 0.8rem;}", ""]);
+exports.push([module.i, "html{font-size: 18px;}\nbody{background-color: #F0F0F2;margin: 0;padding: 0;}\nheader{background-color: #F8F8F8;text-align: center;border-bottom: 2px solid #C7C7C8;}\nheader span{display: inline-block;margin: 2vh;}\n#gesture-wrap{}\n#tips{text-align: center;height: 6vh;margin-top: 8vh}\n#points{width: 70vw; height: 70vw;margin: 0 auto;display: flex;flex-direction: column;justify-content: space-between;}\n.points-row{display: flex;flex-direction: row;justify-content: space-between}\n.point{height: 16vw; width: 16vw;border-radius: 50%;border: 1px solid #D5D4D5;}\n#gesture-lock{height:100vw; width: 100vw;}\n#choices{width: 60vw;margin: 0 auto;text-align: center;display: flex;justify-content: space-around}\n.choice{font-size: 0.8rem;}", ""]);
 
 // exports
 
