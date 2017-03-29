@@ -9479,6 +9479,8 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _react = __webpack_require__(52);
@@ -9505,7 +9507,13 @@ var AppLock = function (_React$Component) {
 
         _this.state = {
             title: '手势密码',
-            tips: '请输入手势'
+            tips: '请输入手势',
+            context: null,
+            points: null,
+            radius: 0,
+            touchedPoints: [],
+            lastPoint: null,
+            untouchedPoints: new Set()
         };
         return _this;
     }
@@ -9513,14 +9521,151 @@ var AppLock = function (_React$Component) {
     _createClass(AppLock, [{
         key: 'handleTouchStart',
         value: function handleTouchStart(event) {
-            console.log(event.target);
+            var points = this.state.points;
+            var context = this.state.context;
+
+            var _getPosition = this.getPosition(event),
+                _getPosition2 = _slicedToArray(_getPosition, 2),
+                x = _getPosition2[0],
+                y = _getPosition2[1];
+
+            for (var i = 0; i < points.length; i++) {
+                if (Math.abs(x - points[i].x) < this.state.radius && Math.abs(y - points[i].y) < this.state.radius) {
+                    if (this.state.untouchedPoints.has(points[i])) {
+                        this.state.touchedPoints.push(points[i]);
+                        this.state.lastPoint = points[i];
+                        this.state.untouchedPoints.delete(points[i]);
+                    }
+                    break;
+                }
+            }
+            this.connectPoints(this.state.touchedPoints, "blue");
+            // this.state.touchedPoints.forEach(function(value) {
+            //     this.drawCircle(value.x, value.y, this.state.radius, "blue");
+            // }.bind(this));
+        }
+    }, {
+        key: 'handleTouchMove',
+        value: function handleTouchMove(event) {
+            var points = this.state.points;
+
+            this.initCanvas();
+
+            var _getPosition3 = this.getPosition(event),
+                _getPosition4 = _slicedToArray(_getPosition3, 2),
+                x = _getPosition4[0],
+                y = _getPosition4[1];
+
+            for (var i = 0; i < points.length; i++) {
+                if (Math.abs(x - points[i].x) < this.state.radius && Math.abs(y - points[i].y) < this.state.radius) {
+                    if (this.state.untouchedPoints.has(points[i])) {
+                        this.state.touchedPoints.push(points[i]);
+                        this.state.lastPoint = points[i];
+                        this.state.untouchedPoints.delete(points[i]);
+                    }
+                    break;
+                }
+            }
+
+            // this.state.touchedPoints.forEach(function(value) {
+            //     this.drawCircle(value.x, value.y, this.state.radius, "blue");
+            // }.bind(this));
+            this.connectPoints(this.state.touchedPoints, this.state.radius, "blue");
+            this.drawLine([x, y], this.state.lastPoint, "blue");
+        }
+    }, {
+        key: 'handleTouchEnd',
+        value: function handleTouchEnd(event) {
+            setTimeout(function () {
+                this.state.touchedPoints = [];
+                this.state.lastPoint = null;
+                this.state.untouchedPoints = new Set(this.state.points);
+                this.initCanvas();
+            }.bind(this), 500);
+        }
+    }, {
+        key: 'connectPoints',
+        value: function connectPoints(points, r, color) {
+            var context = this.state.context;
+            context.strokeStyle = color;
+            context.beginPath();
+            for (var i = 0; i < points.length; i++) {
+                var x = points[i].x,
+                    y = points[i].y;
+                context.moveTo(x + r, y);
+                context.arc(x, y, r, 0, 2 * Math.PI);
+            }
+            context.stroke();
+            for (var _i = 0; _i < points.length; _i++) {
+                context.fillStyle = color;
+                context.beginPath();
+                var _x = points[_i].x,
+                    _y = points[_i].y;
+                context.arc(_x, _y, r / 2, 0, 2 * Math.PI);
+                context.closePath();
+                context.fill();
+            }
+            if (points.length > 1) {
+                for (var _i2 = 0; _i2 < points.length - 1; _i2++) {
+                    context.beginPath();
+                    context.moveTo(points[_i2].x, points[_i2].y);
+                    context.lineTo(points[_i2 + 1].x, points[_i2 + 1].y);
+                    context.stroke();
+                }
+            }
+        }
+    }, {
+        key: 'initCanvas',
+        value: function initCanvas() {
+            var points = this.state.points;
+            var context = this.state.context;
+            context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+
+            for (var i = 0; i < points.length; i++) {
+                this.drawCircle(points[i].x, points[i].y, this.state.radius, "black");
+            }
+        }
+    }, {
+        key: 'drawLine',
+        value: function drawLine(position, lastPoint, color) {
+            if (lastPoint === null) {
+                return;
+            }
+
+            var _position = _slicedToArray(position, 2),
+                x = _position[0],
+                y = _position[1];
+
+            var context = this.state.context;
+            context.strokeStyle = color;
+            context.beginPath();
+            context.moveTo(lastPoint.x, lastPoint.y);
+            context.lineTo(x, y);
+            context.stroke();
+        }
+    }, {
+        key: 'drawCircle',
+        value: function drawCircle(x, y, r, color) {
+            var context = this.state.context;
+            context.strokeStyle = color;
+            context.beginPath();
+            context.moveTo(x + r, y);
+            context.arc(x, y, r, 0, 2 * Math.PI);
+            context.stroke();
+        }
+    }, {
+        key: 'getPosition',
+        value: function getPosition(event) {
+            var rect = event.target.getBoundingClientRect();
+            var x = event.targetTouches[0].pageX - rect.left;
+            var y = event.targetTouches[0].pageY - rect.top;
+            return [x, y];
         }
     }, {
         key: 'resetCanvasHW',
         value: function resetCanvasHW() {
-            var drawing = document.getElementById('gesture-lock');
-            if (drawing.getContext) {
-                var context = drawing.getContext("2d");
+            if (this.state.context) {
+                var context = this.state.context;
                 context.canvas.width = context.canvas.clientWidth;
                 context.canvas.height = context.canvas.clientHeight;
                 console.log('resize canvas HW');
@@ -9529,12 +9674,14 @@ var AppLock = function (_React$Component) {
     }, {
         key: 'drawCircles',
         value: function drawCircles() {
-            var drawing = document.getElementById('gesture-lock');
-            if (drawing.getContext) {
-                var context = drawing.getContext("2d"),
+            if (this.state.context) {
+                var context = this.state.context,
                     n = 3;
                 var width = context.canvas.width;
                 var r = width / (n * 2 + (n + 1) * 1.6);
+                this.setState({
+                    radius: r
+                });
                 var arr = [];
                 for (var i = 0; i < n; i++) {
                     for (var j = 0; j < n; j++) {
@@ -9544,20 +9691,27 @@ var AppLock = function (_React$Component) {
                         });
                     }
                 }
-                context.beginPath();
+
                 arr.forEach(function (value) {
-                    context.moveTo(value.x + r, value.y);
-                    context.arc(value.x, value.y, r, 0, 2 * Math.PI);
+                    this.drawCircle(value.x, value.y, r, "black");
+                }.bind(this));
+
+                this.setState({
+                    points: arr,
+                    untouchedPoints: new Set(arr)
                 });
-                context.stroke();
             }
         }
     }, {
         key: 'componentDidMount',
         value: function componentDidMount() {
             window.addEventListener("resize", this.resetCanvasHW);
-            this.resetCanvasHW();
-            this.drawCircles();
+            this.setState({
+                context: document.getElementById('gesture-lock').getContext("2d")
+            }, function () {
+                this.resetCanvasHW();
+                this.drawCircles();
+            }.bind(this));
         }
     }, {
         key: 'componentWillUnMount',
@@ -9569,7 +9723,7 @@ var AppLock = function (_React$Component) {
         value: function render() {
             return _react2.default.createElement(
                 'div',
-                { onTouchStart: this.handleTouchStart },
+                null,
                 _react2.default.createElement(
                     'header',
                     null,
@@ -9589,7 +9743,7 @@ var AppLock = function (_React$Component) {
                     ),
                     _react2.default.createElement(
                         'canvas',
-                        { id: 'gesture-lock' },
+                        { id: 'gesture-lock', onTouchStart: this.handleTouchStart.bind(this), onTouchMove: this.handleTouchMove.bind(this), onTouchEnd: this.handleTouchEnd.bind(this) },
                         'A Gesture Lock'
                     )
                 ),
