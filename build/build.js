@@ -9505,15 +9505,20 @@ var AppLock = function (_React$Component) {
 
         var _this = _possibleConstructorReturn(this, (AppLock.__proto__ || Object.getPrototypeOf(AppLock)).call(this, props));
 
+        _this.resetTimeInterval = 500;
         _this.state = {
             title: '手势密码',
-            tips: '请输入手势',
+            tips: '请验证手势密码',
             context: null,
             points: null,
             radius: 0,
             touchedPoints: [],
             lastPoint: null,
-            untouchedPoints: new Set()
+            untouchedPoints: new Set(),
+            setPassFlag: false,
+            verifyPassFlag: false,
+            tempPass: [],
+            checkPassFlag: false
         };
         return _this;
     }
@@ -9574,14 +9579,134 @@ var AppLock = function (_React$Component) {
             this.drawLine([x, y], this.state.lastPoint, "blue");
         }
     }, {
+        key: 'resetPass',
+        value: function resetPass() {
+            this.setState({
+                checkPassFlag: false,
+                setPassFlag: true,
+                verifyPassFlag: true,
+                tempPass: [],
+                tips: "请输入新的手势密码"
+            });
+        }
+    }, {
+        key: 'checkPass',
+        value: function checkPass() {
+            this.setState({
+                checkPassFlag: true,
+                setPassFlag: false,
+                verifyPassFlag: false,
+                tips: "请验证手势密码"
+            });
+        }
+    }, {
         key: 'handleTouchEnd',
         value: function handleTouchEnd(event) {
-            setTimeout(function () {
-                this.state.touchedPoints = [];
-                this.state.lastPoint = null;
-                this.state.untouchedPoints = new Set(this.state.points);
-                this.initCanvas();
-            }.bind(this), 500);
+            if (this.state.checkPassFlag) {
+                if (this.state.touchedPoints.length < 5) {
+                    this.setState({
+                        tips: "输入的密码不正确"
+                    });
+                    setTimeout(function () {
+                        this.setState({
+                            touchedPoints: [],
+                            lastPoint: null,
+                            untouchedPoints: new Set(this.state.points),
+                            tips: "请验证手势密码"
+                        });
+                        this.initCanvas();
+                    }.bind(this), this.resetTimeInterval);
+                } else {
+                    var jsonPass = localStorage.getItem("pass");
+                    var pass = JSON.parse(jsonPass);
+                    var len = 0;
+                    if (this.state.touchedPoints.length === pass.length) {
+                        for (var i = 0; i < this.state.touchedPoints.length; i++) {
+                            if (Math.abs(this.state.touchedPoints[i].x - pass[i].x) < this.state.radius && Math.abs(this.state.touchedPoints[i].y - pass[i].y) < this.state.radius) {
+                                len++;
+                            }
+                        }
+                    }
+                    if (len !== pass.length) {
+                        this.setState({
+                            tips: "输入的密码不正确"
+                        });
+                        setTimeout(function () {
+                            this.setState({
+                                touchedPoints: [],
+                                lastPoint: null,
+                                untouchedPoints: new Set(this.state.points),
+                                tips: "请验证手势密码"
+                            });
+                            this.initCanvas();
+                        }.bind(this), this.resetTimeInterval);
+                    } else {
+                        this.setState({
+                            tips: "密码正确！"
+                        });
+                        setTimeout(function () {
+                            this.setState({
+                                touchedPoints: [],
+                                lastPoint: null,
+                                untouchedPoints: new Set(this.state.points),
+                                tips: "请验证手势密码"
+                            });
+                            this.initCanvas();
+                        }.bind(this), this.resetTimeInterval);
+                    }
+                }
+            } else {
+                if (this.state.setPassFlag) {
+                    if (this.state.touchedPoints.length < 5) {
+                        this.setState({
+                            tips: "密码太短，至少需要5个点"
+                        });
+                    } else {
+                        this.setState({
+                            setPassFlag: false,
+                            tempPass: this.state.touchedPoints,
+                            tips: "请再次输入手势密码"
+                        });
+                    }
+                }
+                if (this.state.setPassFlag === false && this.state.verifyPassFlag) {
+                    if (this.state.touchedPoints.length !== this.state.tempPass.length) {
+                        this.setState({
+                            tips: "两次输入的不一样"
+                        });
+                    } else {
+                        var _len = 0;
+                        for (var _i = 0; _i < this.state.touchedPoints.length; _i++) {
+                            if (this.state.touchedPoints[_i] !== this.state.tempPass[_i]) {
+                                this.setState({
+                                    tips: "两次输入的不一样"
+                                });
+                                break;
+                            }
+                            _len++;
+                        }
+                        if (_len === this.state.tempPass.length) {
+                            localStorage.setItem("pass", JSON.stringify(this.state.tempPass));
+                            this.setState({
+                                tips: "密码设置成功",
+                                verifyPassFlag: false,
+                                tempPass: []
+                            });
+                            setTimeout(this.checkPass.bind(this), this.resetTimeInterval);
+                        }
+                    }
+                }
+                if (this.state.verifyPassFlag) {
+                    setTimeout(function () {
+                        this.setState({
+                            touchedPoints: [],
+                            lastPoint: null,
+                            untouchedPoints: new Set(this.state.points)
+                        });
+                        this.initCanvas();
+                    }.bind(this), this.resetTimeInterval);
+                }
+            }
         }
     }, {
         key: 'connectPoints',
@@ -9596,20 +9721,20 @@ var AppLock = function (_React$Component) {
                 context.arc(x, y, r, 0, 2 * Math.PI);
             }
             context.stroke();
-            for (var _i = 0; _i < points.length; _i++) {
+            for (var _i2 = 0; _i2 < points.length; _i2++) {
                 context.fillStyle = color;
                 context.beginPath();
-                var _x = points[_i].x,
-                    _y = points[_i].y;
+                var _x = points[_i2].x,
+                    _y = points[_i2].y;
                 context.arc(_x, _y, r / 2, 0, 2 * Math.PI);
                 context.closePath();
                 context.fill();
             }
             if (points.length > 1) {
-                for (var _i2 = 0; _i2 < points.length - 1; _i2++) {
+                for (var _i3 = 0; _i3 < points.length - 1; _i3++) {
                     context.beginPath();
-                    context.moveTo(points[_i2].x, points[_i2].y);
-                    context.lineTo(points[_i2 + 1].x, points[_i2 + 1].y);
+                    context.moveTo(points[_i3].x, points[_i3].y);
+                    context.lineTo(points[_i3 + 1].x, points[_i3 + 1].y);
                     context.stroke();
                 }
             }
@@ -9668,7 +9793,6 @@ var AppLock = function (_React$Component) {
                 var context = this.state.context;
                 context.canvas.width = context.canvas.clientWidth;
                 context.canvas.height = context.canvas.clientHeight;
-                console.log('resize canvas HW');
             }
         }
     }, {
@@ -9711,6 +9835,7 @@ var AppLock = function (_React$Component) {
             }, function () {
                 this.resetCanvasHW();
                 this.drawCircles();
+                this.checkPass();
             }.bind(this));
         }
     }, {
@@ -9752,12 +9877,12 @@ var AppLock = function (_React$Component) {
                     { id: 'choices' },
                     _react2.default.createElement(
                         'div',
-                        { id: 'set-pass', className: 'choice' },
+                        { id: 'set-pass', className: 'choice', onClick: this.resetPass.bind(this) },
                         '\u8BBE\u7F6E\u5BC6\u7801'
                     ),
                     _react2.default.createElement(
                         'div',
-                        { id: 'verify-pass', className: 'choice' },
+                        { id: 'verify-pass', className: 'choice', onClick: this.checkPass.bind(this) },
                         '\u9A8C\u8BC1\u5BC6\u7801'
                     )
                 )
