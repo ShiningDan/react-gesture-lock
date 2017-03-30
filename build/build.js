@@ -9506,6 +9506,9 @@ var AppLock = function (_React$Component) {
         var _this = _possibleConstructorReturn(this, (AppLock.__proto__ || Object.getPrototypeOf(AppLock)).call(this, props));
 
         _this.resetTimeInterval = 500;
+        _this.lineColor = "#5BC72D";
+        _this.stickLine = 8;
+        _this.thinLine = 2;
         _this.state = {
             title: '手势密码',
             tips: '请验证手势密码',
@@ -9544,7 +9547,7 @@ var AppLock = function (_React$Component) {
                     break;
                 }
             }
-            this.connectPoints(this.state.touchedPoints, "blue");
+            this.connectPoints(this.state.touchedPoints, this.lineColor);
             // this.state.touchedPoints.forEach(function(value) {
             //     this.drawCircle(value.x, value.y, this.state.radius, "blue");
             // }.bind(this));
@@ -9575,8 +9578,8 @@ var AppLock = function (_React$Component) {
             // this.state.touchedPoints.forEach(function(value) {
             //     this.drawCircle(value.x, value.y, this.state.radius, "blue");
             // }.bind(this));
-            this.connectPoints(this.state.touchedPoints, this.state.radius, "blue");
-            this.drawLine([x, y], this.state.lastPoint, "blue");
+            this.connectPoints(this.state.touchedPoints, this.state.radius, this.lineColor);
+            this.drawLine([x, y], this.state.lastPoint, this.lineColor);
         }
     }, {
         key: 'resetPass',
@@ -9713,6 +9716,7 @@ var AppLock = function (_React$Component) {
         value: function connectPoints(points, r, color) {
             var context = this.state.context;
             context.strokeStyle = color;
+            context.lineWidth = this.thinLine;
             context.beginPath();
             for (var i = 0; i < points.length; i++) {
                 var x = points[i].x,
@@ -9733,6 +9737,7 @@ var AppLock = function (_React$Component) {
             if (points.length > 1) {
                 for (var _i3 = 0; _i3 < points.length - 1; _i3++) {
                     context.beginPath();
+                    context.lineWidth = this.stickLine;
                     context.moveTo(points[_i3].x, points[_i3].y);
                     context.lineTo(points[_i3 + 1].x, points[_i3 + 1].y);
                     context.stroke();
@@ -9763,6 +9768,7 @@ var AppLock = function (_React$Component) {
 
             var context = this.state.context;
             context.strokeStyle = color;
+            context.lineWidth = this.stickLine;
             context.beginPath();
             context.moveTo(lastPoint.x, lastPoint.y);
             context.lineTo(x, y);
@@ -9773,6 +9779,7 @@ var AppLock = function (_React$Component) {
         value: function drawCircle(x, y, r, color) {
             var context = this.state.context;
             context.strokeStyle = color;
+            context.lineWidth = this.thinLine;
             context.beginPath();
             context.moveTo(x + r, y);
             context.arc(x, y, r, 0, 2 * Math.PI);
